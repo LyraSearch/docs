@@ -157,7 +157,7 @@ You can save this data wherever you want and later restore it using the
 ```js title="Restore in-memory database"
 import { importInstance } from '@lyrasearch/plugin-data-persistence'
 
-const restoredInstance = importInstance('binary', serializedData)
+const restoredInstance = importInstance(serializedData, 'binary')
 
 search(restoredInstance, {
   term: 'free'
