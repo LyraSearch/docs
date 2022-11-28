@@ -1,0 +1,108 @@
+
+---
+description: Document indexer for lyra
+---
+
+import GithubStarsButton from '../../src/components/Button/GithubStars';
+
+# Parsedoc plugin
+
+[![Tests](https://github.com/LyraSearch/plugin-parsedoc/actions/workflows/tests.yml/badge.svg)](https://github.com/LyraSearch/plugin-parsedoc/actions/workflows/tests.yml)
+[![GitHub Repo stars](https://img.shields.io/github/stars/lyrasearch/plugin-data-persistence?style=social)](https://github.com/lyrasearch/plugin-data-persistence)
+
+The `plugin-parsedoc` plugin allows Lyra to create an index from documents.
+
+## Index
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#persisting-the-database-to-disk)
+  - [`populateFromGlob`](#populateFromGlob)
+  - [`populate`](#populate)
+  - [`defautlHtmlSchema`](#defautlHtmlSchema)
+- [License](#license)
+
+## Installation
+
+You can install the plugin using any major Node.js/Bun package manager:
+
+```bash title="Install with npm"
+npm install --save @lyrasearch/plugin-parsedoc
+```
+
+```bash title="Install with yarn"
+yarn add @lyrasearch/plugin-parsedoc
+```
+
+```bash title="Install with pnpm"
+pnpm add @lyrasearch/plugin-parsedoc
+```
+
+Deno installation guide will be available soon.
+
+## Usage
+
+Plugin usage depends on the runtime that you are using, even though the goal is
+to expose the exact same APIs for browsers, Deno, and all the other JavaScript
+engines.
+
+The plugin exports `defaultHtmlSchema` which will be the schema used in the index.
+Providing a glob pattern to the files containing the documents will index them.
+
+```js title="Lyra instance"
+import { create, insert } from '@lyrasearch/lyra'
+import { populateFromGlob, defaultHtmlSchema } from "@lyrasearch/plugin-parsedoc";
+
+
+const db = create({
+  schema: defaultHtmlSchema
+})
+
+await populateFromGlob(db, "docs/**/*.html")
+```
+
+## API Reference
+
+### `populateFromGlob`
+
+An asynchronous function that takes three arguments:
+
+* `db`: the database to populate.
+* `globPath`: a string representing a glob path to read the files from.
+* `options`: an object containing the following properties:
+  * `transform` (optional): a function that passes an object as its only argument. It should contain the raw HTML/Markdown chunk, tag name, and parsed content.
+  * `mergeStrategy` (optional): a value that defines how to handle consecutive chunks of the same tag. The default value is `merge`. Accepted values are: 
+    * `merge`: consecutive chunks with the same tag will be merged into one document for the index.
+    * `split`: consecutive chunks with the same tag will be split into separate documents for the index.
+    * `both`: consecutive chunks with the same tag will be split into separate documents for the index, and also merged into one document for the index.
+
+### `populate`
+
+A function that takes three arguments. Should be used internally by `populateFromGlob`:
+
+* `db`: the database to populate. Should use Lyra's native `insert` or `insertBatch` methods internally.
+* `data`: raw HTML/Markdown string or Buffer.
+* `options`: an object containing the following properties:
+  * `transform` (optional): a function that passes an object as its only argument. It should contain the raw HTML/Markdown chunk, tag name, and parsed content.
+  * `mergeStrategy` (optional): a value that defines how to handle consecutive chunks of the same tag. The default value is `merge`. Accepted values are: 
+    * `merge`: consecutive chunks with the same tag will be merged into one document for the index.
+    * `split`: consecutive chunks with the same tag will be split into separate documents for the index.
+    * `both`: consecutive chunks with the same tag will be split into separate documents for the index, and also merged into one document for the index.
+  * `basePath` (optional): a string representing the base path of the file. This is used to generate the `id` field in the index`
+
+
+### defaultHtmlSchema
+The populated index would contain the following fields:
+
+```typescript
+{
+  type: 'string', // the HTML tag, e.g. h1, p, etc.
+  content: 'string', // inner text
+  id: 'string', // the id of the HTML/Markdown file followed by JSON path to the tag
+}
+```
+
+# License
+
+This plugin is licensed under the
+[Apache License 2.0](https://github.com/LyraSearch/plugin-data-persistence/blob/main/LICENSE.md).
