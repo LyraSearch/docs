@@ -79,3 +79,12 @@ import { persistToFile } from "@lyrasearch/plugin-data-persistence";
 
 const filePath = persistToFile(originalInstance, "binary", "./quotes.msp");
 ```
+
+## Restore the database from disk[​](https://docs.lyrasearch.io/plugins/plugin-data-persistence#restore-the-database-from-disk) <a href="#restore-the-database-from-disk" id="restore-the-database-from-disk"></a>
+
+To restore the database from the disk:
+
+```javascript
+import { restoreFromFile } from "@lyrasearch/plugin-data-persistence";
+const db = restoreFromFile("binary", filePath);
+```
